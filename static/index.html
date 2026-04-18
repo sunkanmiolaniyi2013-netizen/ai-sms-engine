@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI SMS Engine — Dashboard</title>
+  <meta name="description" content="Monitor and manage AI SMS conversations powered by Gemini + GHL" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">⚡</div>
+          <div>
+            <div class="logo-title">SMS AI Engine</div>
+            <div class="logo-sub">Powered by Gemini</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-label">BUSINESSES</div>
+        <div id="business-list" class="business-list">
+          <div class="loading-state">Loading...</div>
+        </div>
+        <button class="btn-add" id="btn-add-business">+ Add Business</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="footer-version">v1.0.0</div>
+      </div>
+    </aside>
+
+    <!-- ── Main content ── -->
+    <main class="main">
+
+      <!-- Top bar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title" id="page-title">Select a Business</h1>
+        </div>
+        <div class="topbar-right" id="topbar-actions"></div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-row" id="stats-row" style="display:none">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-convos">—</div>
+          <div class="stat-label">Conversations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-messages">—</div>
+          <div class="stat-label">Total Messages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-ai">—</div>
+          <div class="stat-label">AI Replies Sent</div>
+        </div>
+        <div class="stat-card status-card">
+          <div class="stat-value status-live">● LIVE</div>
+          <div class="stat-label">Engine Status</div>
+        </div>
+      </div>
+
+      <!-- Conversation panel -->
+      <div class="content-area" id="content-area">
+        <div class="empty-state">
+          <div class="empty-icon">💬</div>
+          <div class="empty-title">No business selected</div>
+          <div class="empty-sub">Choose a business from the sidebar to view conversations</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Add Business Modal ── -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Add Business</h2>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="business-form">
+          <input type="hidden" id="form-business-id" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Business Name *</label>
+              <input class="form-input" id="form-name" placeholder="My Dental Clinic" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">AI Internal Instructions / Persona</label>
+                <textarea class="form-textarea" id="aiPrompt" rows="3" required></textarea>
+            </div>
+          </div>
+          <div class="form-row two-col">
+            <div class="form-group">
+                <label class="form-label">Pricing Information (Optional)</label>
+                <textarea class="form-textarea" id="pricingInfo" rows="2" placeholder="List prices here so the AI doesn't guess. Leave blank to force the AI to refuse giving a price estimate."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Initial Outreach Message (Optional)</label>
+                <textarea class="form-textarea" id="outreachMessage" rows="2" placeholder="The very first text your automation sends them."></textarea>
+            </div>
+          </div>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">GHL Location ID *</label>
+              <input class="form-input" id="form-location-id" placeholder="location_id from GHL" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">GHL API Key (Optional v1)</label>
+              <input class="form-input" id="form-api-key" type="password" placeholder="Leave blank if using OAuth below" />
+            </div>
+          </div>
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">GHL OAuth Client ID</label>
+              <input class="form-input" id="form-client-id" placeholder="Client ID from Developer App" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">GHL OAuth Client Secret</label>
+              <input class="form-input" id="form-client-secret" type="password" placeholder="Client Secret" />
+            </div>
+          </div>
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">GHL Access Token</label>
+              <input class="form-input" id="form-access-token" type="password" placeholder="Initial Access Token" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">GHL Refresh Token</label>
+              <input class="form-input" id="form-refresh-token" type="password" placeholder="Initial Refresh Token" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">GHL Calendar ID (For Auto-Booking)</label>
+              <input class="form-input" id="form-calendar-id" placeholder="e.g. kH2vS... (from Calendar Settings)" />
+            </div>
+          </div>
+
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">Business Website URL</label>
+              <input class="form-input" id="form-website" placeholder="https://mybusiness.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Calendar Booking Link</label>
+              <input class="form-input" id="form-calendar" placeholder="https://calendly.com/..." />
+            </div>
+          </div>
+
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">Reply Delay Min (seconds)</label>
+              <input class="form-input" id="form-delay-min" type="number" value="60" min="5" max="600" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Reply Delay Max (seconds)</label>
+              <input class="form-input" id="form-delay-max" type="number" value="180" min="10" max="600" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">AI Model</label>
+            <select class="form-input" id="form-model">
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash (Fast, Free)</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Smarter)</option>
+            </select>
+          </div>
+
+          <div class="form-actions" style="display:flex; justify-content:space-between; width:100%;">
+            <button type="button" class="btn-secondary" style="background:var(--brand-red); border-color:var(--brand-red); display:none;" id="btn-delete-business" onclick="deleteActiveBusiness()">Delete</button>
+            <div>
+              <button type="button" class="btn-secondary" id="btn-cancel">Cancel</button>
+              <button type="submit" class="btn-primary" id="btn-save">Save Business</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Conversation Thread Panel ── -->
+  <div class="thread-panel" id="thread-panel">
+    <div class="thread-header">
+      <button class="btn-back" id="btn-back-thread">← Back</button>
+      <div class="thread-contact" id="thread-contact-name">Contact</div>
+    </div>
+    <div class="thread-messages" id="thread-messages"></div>
+  </div>
+
+  <!-- ─── Campaigns List Modal ─── -->
+  <div class="modal-overlay" id="campaigns-list-modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <h2 id="campaigns-modal-title">Campaigns</h2>
+      <button class="btn-primary mb-3" onclick="openCampaignEditModal()">+ New Campaign</button>
+      <div id="campaigns-list-container" style="display: grid; gap: 10px;">
+        <!-- Campaign cards injected here -->
+      </div>
+      <div class="modal-actions mt-3">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('campaigns-list-modal').classList.remove('open')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Campaign Edit Modal ─── -->
+  <div class="modal-overlay" id="campaign-edit-modal">
+    <div class="modal-content">
+      <h2 id="campaign-edit-modal-title">Edit Campaign</h2>
+      <form id="campaign-form">
+        <input type="hidden" id="form-campaign-id">
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Campaign Name *</label>
+                <input type="text" class="form-input" id="campName" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">AI Instructions / Persona (Overrides Default) *</label>
+                <textarea class="form-textarea" id="campAiPrompt" rows="3" required></textarea>
+            </div>
+        </div>
+        <div class="form-row two-col">
+            <div class="form-group">
+                <label class="form-label">Pricing Information (Overrides Default)</label>
+                <textarea class="form-textarea" id="campPricingInfo" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Initial Outreach Message (Overrides Default)</label>
+                <textarea class="form-textarea" id="campOutreachMessage" rows="2"></textarea>
+            </div>
+        </div>
+        <div class="form-row two-col">
+          <div class="form-group">
+            <label class="form-label">GHL Calendar ID (Overrides Default)</label>
+            <input class="form-input" id="campGhlCalendarId" placeholder="calendar_id (optional)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Backup Calendar Link</label>
+            <input class="form-input" id="campCalendarLink" placeholder="https:// (optional)">
+          </div>
+        </div>
+        <div class="modal-actions mt-3">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('campaign-edit-modal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="btn-primary" id="btn-save-campaign">Save Campaign</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
