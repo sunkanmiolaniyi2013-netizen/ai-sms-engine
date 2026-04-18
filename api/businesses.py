@@ -1,7 +1,7 @@
 """
 api/businesses.py — Business (tenant) management endpoints
 """
-from fastapi import APIRouter, HTTPException, Form
+from fastapi import APIRouter, HTTPException, Form, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from typing import Optional
@@ -111,7 +111,7 @@ def get_stats(business_id: str):
 
 
 @router.post("/oauth/exchange")
-def oauth_exchange(code: str = Form(...), business_id: str = Form(...)):
+def oauth_exchange(request: Request, code: str = Form(...), business_id: str = Form(...)):
     """Exchanges the GHL authorization code for keys and saves them."""
     business = db.get_business(business_id)
     if not business:
@@ -123,12 +123,17 @@ def oauth_exchange(code: str = Form(...), business_id: str = Form(...)):
     if not client_id or not client_secret:
         raise HTTPException(status_code=400, detail="Client ID or Secret missing in business settings")
         
+    redirect_uri = str(request.base_url).rstrip("/") + "/oauth/callback"
+    # Ensure it uses https if it's running behind a proxy like Railway
+    if "localhost" not in redirect_uri and redirect_uri.startswith("http://"):
+        redirect_uri = redirect_uri.replace("http://", "https://")
+
     data = {
         "client_id": client_id,
         "client_secret": client_secret,
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": "http://localhost:8000/oauth/callback"
+        "redirect_uri": redirect_uri
     }
     
     headers = {

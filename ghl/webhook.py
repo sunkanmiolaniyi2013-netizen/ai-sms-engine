@@ -98,7 +98,7 @@ async def inbound_sms(request: Request, background_tasks: BackgroundTasks, campa
         logger.warning(f"No business found for location_id={location_id}")
         return {"status": "error", "detail": f"No business configured for location {location_id}"}
 
-    api_key = business["ghl_api_key"]
+    business_id = business["id"]
     delay_min = business.get("delay_min", 60)
     delay_max = business.get("delay_max", 180)
 
@@ -110,7 +110,7 @@ async def inbound_sms(request: Request, background_tasks: BackgroundTasks, campa
         message_body=message_body,
         contact_name=contact_name,
         contact_phone=contact_phone,
-        api_key=api_key,
+        business_id=business_id,
         delay_min=delay_min,
         delay_max=delay_max,
         campaign_id=campaign_id,
@@ -125,7 +125,7 @@ async def _run_pipeline_and_schedule(
     message_body: str,
     contact_name: Optional[str],
     contact_phone: Optional[str],
-    api_key: str,
+    business_id: str,
     delay_min: int,
     delay_max: int,
     campaign_id: Optional[str] = None,
@@ -148,6 +148,6 @@ async def _run_pipeline_and_schedule(
             location_id=location_id,
             ghl_contact_id=ghl_contact_id,
             reply=reply,
-            api_key=api_key,
+            business_id=business_id,
             phone=contact_phone,
         )

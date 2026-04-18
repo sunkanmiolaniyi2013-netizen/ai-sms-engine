@@ -119,7 +119,7 @@ async def send_delayed_reply(
     location_id: str,
     ghl_contact_id: str,
     reply: str,
-    api_key: str,
+    business_id: str,
     phone: Optional[str] = None,
 ):
     """Just sends the GHL message — called after delay fires."""
@@ -127,7 +127,7 @@ async def send_delayed_reply(
         location_id=location_id,
         contact_id=ghl_contact_id,
         message=reply,
-        api_key=api_key,
+        business_id=business_id,
         phone=phone,
     )
     if not success:
