@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('btn-cancel').addEventListener('click', closeModal);
   document.getElementById('btn-back-thread').addEventListener('click', closeThread);
-  document.getElementById('btn-delete-thread').addEventListener('click', deleteActiveThread);
   document.getElementById('business-form').addEventListener('submit', saveBusinessForm);
   document.getElementById('modal-overlay').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) closeModal();
@@ -122,6 +121,7 @@ function convCard(c) {
       <div class="conv-meta">
         <div class="conv-time">${date}</div>
         <span class="conv-badge">${c.total_messages} msgs</span>
+        <button class="conv-delete-btn" title="Delete conversation" onclick="deleteConversation('${c.id}', event)">🗑</button>
       </div>
     </div>`;
 }
@@ -157,15 +157,17 @@ function closeThread() {
   document.getElementById('thread-panel').classList.remove('open');
 }
 
-async function deleteActiveThread() {
-  if (!activeThreadId) return;
+async function deleteConversation(conversationId, event) {
+  event.stopPropagation(); // Prevent the card click from opening the thread
   if (!confirm("Are you sure you want to permanently delete this conversation and all its messages?")) return;
   
   try {
-    const res = await fetch(`${API}/api/conversations/${activeThreadId}`, { method: 'DELETE' });
+    const res = await fetch(`${API}/api/conversations/${conversationId}`, { method: 'DELETE' });
     if (!res.ok) throw new Error(await res.text());
     
-    closeThread();
+    // If the deleted convo was open in the thread panel, close it
+    if (activeThreadId === conversationId) closeThread();
+    
     if (activeBusiness) {
       await loadConversations(activeBusiness.id);
       await loadStats(activeBusiness.id);
