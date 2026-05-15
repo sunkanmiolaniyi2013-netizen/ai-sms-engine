@@ -3,6 +3,7 @@
  */
 const API = '';
 let activeBusiness = null;
+let activeThreadId = null;
 
 // ─── Init ───────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('btn-cancel').addEventListener('click', closeModal);
   document.getElementById('btn-back-thread').addEventListener('click', closeThread);
+  document.getElementById('btn-delete-thread').addEventListener('click', deleteActiveThread);
   document.getElementById('business-form').addEventListener('submit', saveBusinessForm);
   document.getElementById('modal-overlay').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) closeModal();
@@ -126,6 +128,7 @@ function convCard(c) {
 
 // ─── Thread ───────────────────────────────────
 async function openThread(conversationId, contactName) {
+  activeThreadId = conversationId;
   document.getElementById('thread-contact-name').textContent = contactName;
   document.getElementById('thread-messages').innerHTML = '<div style="color:var(--text-3);text-align:center;padding:40px">Loading...</div>';
   document.getElementById('thread-panel').classList.add('open');
@@ -150,7 +153,26 @@ async function openThread(conversationId, contactName) {
 }
 
 function closeThread() {
+  activeThreadId = null;
   document.getElementById('thread-panel').classList.remove('open');
+}
+
+async function deleteActiveThread() {
+  if (!activeThreadId) return;
+  if (!confirm("Are you sure you want to permanently delete this conversation and all its messages?")) return;
+  
+  try {
+    const res = await fetch(`${API}/api/conversations/${activeThreadId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(await res.text());
+    
+    closeThread();
+    if (activeBusiness) {
+      await loadConversations(activeBusiness.id);
+      await loadStats(activeBusiness.id);
+    }
+  } catch(e) {
+    alert("Failed to delete conversation: " + e.message);
+  }
 }
 
 // ─── Modal ───────────────────────────────────

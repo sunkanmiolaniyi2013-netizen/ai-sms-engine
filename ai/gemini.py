@@ -35,7 +35,7 @@ IMPORTANT REPLY RULES:
 
 def _build_system_prompt(business_prompt: str, website_context: Optional[str], calendar_link: Optional[str], pricing_info: Optional[str] = None, outreach_message: Optional[str] = None) -> str:
     import datetime
-    today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    today = datetime.datetime.now(datetime.timezone.utc).strftime("%A, %Y-%m-%d %H:%M:%S UTC")
     
     parts = [
         f"CURRENT SERVER TIME: {today}\nUse this as a baseline to determine 'today', 'tomorrow', 'next week', etc.\n",

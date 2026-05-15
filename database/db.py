@@ -64,6 +64,13 @@ def delete_business(business_id: str):
     db.table("businesses").delete().eq("id", business_id).execute()
 
 
+def delete_conversation(conversation_id: str):
+    db = get_db()
+    # Delete messages first to satisfy any potential foreign key constraints
+    db.table("messages").delete().eq("conversation_id", conversation_id).execute()
+    db.table("conversations").delete().eq("id", conversation_id).execute()
+
+
 # ─────────────────────────────────────────
 # Contact helpers
 # ─────────────────────────────────────────
